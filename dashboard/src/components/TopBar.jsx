@@ -1,85 +1,62 @@
-import ExportMenu from './ExportMenu';
-
-export default function TopBar({ source, onRefresh, sessions, onUploadNew, onCompare, currentPage }) {
+export default function TopBar({ source, sessionCount }) {
   const isLive = source === 'live';
-
+  
   return (
-    <header className="sticky top-0 z-40 border-b border-[#1e2744] bg-[#0c1024]/90 backdrop-blur-xl">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+    <header className="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-6 shrink-0 w-full">
+      
+      {/* Left Area: File Selector */}
+      <div className="flex items-center text-sm font-medium text-slate-600">
+        <span className="text-slate-400 mr-2">Analysis:</span>
+        <button className="flex items-center gap-1.5 hover:text-slate-900 focus:outline-none">
+          {isLive ? 'live_traffic.pcap' : 'enterprise_mail_traffic.pcap'}
+          <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
 
-        {/* Brand */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-          <div className="hidden sm:block">
-            <span className="text-sm font-bold text-white tracking-tight">SecureMailScope</span>
-            <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#1e2744] text-[#6c86f5] border border-[#6c86f5]/30">
-              v1.0
-            </span>
+      {/* Center: Search Bar */}
+      <div className="flex-1 max-w-xl mx-8">
+        <div className="relative flex items-center">
+          <svg className="w-4 h-4 absolute left-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Search IPs, domains, certs, findings..." 
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-14 py-2 text-sm text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500"
+          />
+          <div className="absolute right-2 flex items-center justify-center bg-slate-100 border border-slate-200 rounded text-[10px] font-mono text-slate-500 px-1.5 py-0.5">
+            Ctrl K
           </div>
         </div>
+      </div>
 
-        {/* Nav tabs */}
-        <nav className="hidden md:flex items-center gap-1">
-          {[
-            { id: 'dashboard', label: 'Dashboard', icon: '▦' },
-            { id: 'upload',    label: 'Analyse Capture', icon: '↑' },
-            { id: 'compare',   label: 'Compare', icon: '⊞' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                if (tab.id === 'upload' && onUploadNew) onUploadNew();
-                if (tab.id === 'compare' && onCompare) onCompare();
-                if (tab.id === 'dashboard' && onRefresh) onRefresh();
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                currentPage === tab.id
-                  ? 'bg-[#6c86f5]/15 text-[#6c86f5] border border-[#6c86f5]/30'
-                  : 'text-[#7b8ab8] hover:text-white hover:bg-[#1e2744]'
-              }`}
-            >
-              <span className="font-mono text-[11px]">{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+      {/* Right Area: Status and Profile */}
+      <div className="flex items-center gap-6">
+        
+        {/* Status Badge */}
+        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-900 rounded-md">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-[10px] font-bold tracking-wider text-emerald-100">PASSIVE ANALYSIS</span>
+        </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Data source indicator */}
-          <div className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border ${
-            isLive
-              ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
-              : source === null
-              ? 'bg-[#1e2744] border-[#1e2744] text-[#4d5a82]'
-              : 'bg-amber-500/10 border-amber-500/25 text-amber-400'
-          }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${
-              isLive ? 'bg-emerald-400 animate-pulse' : 'bg-[#4d5a82]'
-            }`} />
-            {isLive ? 'Live' : source === null ? 'Loading…' : 'Offline'}
-          </div>
-
-          {/* Refresh */}
-          <button
-            onClick={onRefresh}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-[#7b8ab8] hover:text-white hover:bg-[#1e2744] border border-transparent hover:border-[#1e2744] transition-all cursor-pointer"
-            title="Refresh data"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+        {/* Action Icons */}
+        <div className="flex items-center gap-3">
+          <button className="text-slate-400 hover:text-slate-600 relative">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            <span className="absolute top-0 right-0 w-2 h-2 rounded-full bg-sky-500 border border-white"></span>
           </button>
-
-          {/* Export */}
-          <ExportMenu sessions={sessions} />
         </div>
+
+        {/* User Profile */}
+        <div className="flex items-center gap-3 border-l border-slate-200 pl-6 cursor-pointer hover:opacity-80">
+          <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center text-sky-600">
+             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+          </div>
+          <span className="text-sm font-semibold text-slate-700">SOC Analyst</span>
+        </div>
+
       </div>
     </header>
   );

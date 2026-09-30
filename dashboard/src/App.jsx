@@ -1,16 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchSessions } from './lib/api';
-import NavBar from './components/NavBar';
-import WelcomeBanner from './components/WelcomeBanner';
-import StatStrip from './components/StatStrip';
-import TlsVersionChart from './components/TlsVersionChart';
-import CipherStrengthChart from './components/CipherStrengthChart';
-import ProtocolBreakdownChart from './components/ProtocolBreakdownChart';
-import RiskDistributionChart from './components/RiskDistributionChart';
-import QuickStatsWidget from './components/QuickStatsWidget';
-import RecentActivityWidget from './components/RecentActivityWidget';
-import FilterBar from './components/FilterBar';
-import ActionHistoryTable from './components/ActionHistoryTable';
+import Sidebar from './components/Sidebar';
+import TopBar from './components/TopBar';
+import DashboardGrid from './components/DashboardGrid';
 import SessionDetail from './components/SessionDetail';
 import UploadPage from './pages/UploadPage';
 import ComparePage from './pages/ComparePage';
@@ -110,105 +102,44 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-dvh flex flex-col selection:bg-sky-500 selection:text-white">
-      {/* ── PERSISTENT TOP NAV — matching existing structure ── */}
-      <NavBar
-        currentPage={page}
-        source={source}
+    <div className="flex h-screen bg-white overflow-hidden text-slate-800 font-sans">
+      <Sidebar 
+        activePage={page} 
         onNavigate={(p) => {
           if (p === 'dashboard' && sessions.length === 0) load();
-          if (p === 'compare') setCompareInitialData(null); // Clear compare initial data on manual nav
+          if (p === 'compare') setCompareInitialData(null); 
           setPage(p);
-        }}
-        onRefresh={load}
-        sessions={sessions}
+        }} 
       />
 
-      {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 overflow-x-hidden">
-        {/* Upload Page */}
-        {page === 'upload' && (
-          <UploadPage onComplete={handleAnalysisComplete} />
-        )}
-
-        {/* History Page */}
-        {page === 'history' && (
-          <HistoryPage onLoadRun={handleLoadHistoryRun} />
-        )}
-
-        {/* Compare Page */}
-        {page === 'compare' && (
-          <ComparePage onCompare={handleCompare} initialData={compareInitialData} />
-        )}
-
-        {/* Dashboard */}
-        {page === 'dashboard' && (
-          <div className="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4 fade-up">
-            {/* Loading */}
-            {loading && (
-              <div className="py-24 flex flex-col items-center gap-4">
-                <div className="w-12 h-12 rounded-full border-3 border-sky-300 border-t-sky-600 spin" />
-                <p className="text-sm font-semibold text-slate-600">Loading session telemetry…</p>
-              </div>
-            )}
-
-            {/* Error */}
-            {error && (
-              <div className="glass-card rounded-2xl p-4 border-rose-200 flex items-center justify-between gap-4">
-                <span className="text-sm text-rose-600 font-semibold">{error}</span>
-                <button
-                  onClick={load}
-                  className="px-4 py-1.5 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 transition-colors cursor-pointer"
-                >
-                  Retry
-                </button>
-              </div>
-            )}
-
-            {!loading && !error && (
-              <>
-                {/* 1. Welcome Greeting Banner */}
-                <WelcomeBanner />
-
-                {/* 2. Top 4 KPI Metric Cards */}
-                <StatStrip sessions={sessions} />
-
-                {/* 3. Two-Column Master Layout (Repositioned) */}
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
-                  {/* Left Column (Widgets) */}
-                  <div className="xl:col-span-4 2xl:col-span-3 space-y-4">
-                    <RiskDistributionChart sessions={sessions} />
-                    <QuickStatsWidget sessions={sessions} />
-                    <RecentActivityWidget sessions={sessions} />
-                  </div>
-
-                  {/* Right Column (Charts & History Table) */}
-                  <div className="xl:col-span-8 2xl:col-span-9 space-y-4">
-                    {/* Middle 3 Charts Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <TlsVersionChart sessions={sessions} />
-                      <CipherStrengthChart sessions={sessions} />
-                      <ProtocolBreakdownChart sessions={sessions} />
-                    </div>
-
-                    {/* Action History Table */}
-                    <ActionHistoryTable 
-                      history={actionHistory} 
-                      onClear={() => setActionHistory([])} 
-                      onItemClick={handleHistoryItemClick}
-                    />
-                  </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <TopBar source={source} sessionCount={sessions.length || 10} />
+        
+        <main className="flex-1 overflow-y-auto bg-slate-50/50 p-6">
+          {page === 'upload' && <UploadPage onComplete={handleAnalysisComplete} />}
+          {page === 'history' && <HistoryPage onLoadRun={handleLoadHistoryRun} />}
+          {page === 'compare' && <ComparePage onCompare={handleCompare} initialData={compareInitialData} />}
+          {page === 'dashboard' && (
+            <div className="max-w-[1400px] mx-auto fade-up">
+              {loading && (
+                <div className="py-24 flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 rounded-full border-3 border-sky-300 border-t-sky-600 spin" />
+                  <p className="text-sm font-semibold text-slate-600">Loading session telemetry…</p>
                 </div>
-              </>
-            )}
-          </div>
-        )}
-      </main>
+              )}
+              {error && (
+                <div className="glass-card rounded-2xl p-4 border-rose-200 flex items-center justify-between gap-4">
+                  <span className="text-sm text-rose-600 font-semibold">{error}</span>
+                  <button onClick={load} className="px-4 py-1.5 bg-rose-500 text-white rounded-xl text-xs font-bold cursor-pointer">Retry</button>
+                </div>
+              )}
+              {!loading && !error && <DashboardGrid sessions={sessions} />}
+            </div>
+          )}
+        </main>
+      </div>
 
-      {/* Session detail inspector drawer */}
-      {selected && (
-        <SessionDetail session={selected} onClose={() => setSelected(null)} />
-      )}
+      {selected && <SessionDetail session={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 }
